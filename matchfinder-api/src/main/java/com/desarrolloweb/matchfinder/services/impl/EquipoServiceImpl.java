@@ -59,9 +59,10 @@ public class EquipoServiceImpl implements EquipoService {
                 .build());
 
         // El creador es el primer integrante
-        usuario.setEquipo(equipo);
-        userRepository.save(usuario);
-        equipo.getMiembros().add(usuario);
+        unirse(usuario.getId(), usuario.getEmail());
+        //usuario.setEquipo(equipo);
+        //userRepository.save(usuario);
+        //equipo.getMiembros().add(usuario);
 
         return EquipoDetalleResponse.desde(equipo);
     }
