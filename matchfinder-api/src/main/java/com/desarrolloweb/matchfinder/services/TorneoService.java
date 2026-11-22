@@ -1,7 +1,10 @@
 package com.desarrolloweb.matchfinder.services;
 
 import com.desarrolloweb.matchfinder.dtos.request.TorneoCreateRequest;
+import com.desarrolloweb.matchfinder.dtos.response.LlaveResponse;
+import com.desarrolloweb.matchfinder.dtos.response.PaginaResponse;
 import com.desarrolloweb.matchfinder.dtos.response.TorneoResponse;
+import com.desarrolloweb.matchfinder.dtos.response.TorneoResumenResponse;
 import com.desarrolloweb.matchfinder.entities.enums.EstadoTorneo;
 
 public interface TorneoService {
@@ -13,4 +16,8 @@ public interface TorneoService {
     TorneoResponse obtenerActivo();
 
     TorneoResponse obtener(Integer id);
+
+    PaginaResponse<TorneoResumenResponse> listar(EstadoTorneo estado, int page, int size);
+
+    LlaveResponse obtenerLlaves(Integer id);
 }

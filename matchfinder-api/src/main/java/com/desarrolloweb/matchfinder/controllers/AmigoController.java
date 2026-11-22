@@ -1,6 +1,6 @@
 package com.desarrolloweb.matchfinder.controllers;
 
-import com.desarrolloweb.matchfinder.dtos.response.UsuarioResumenResponse;
+import com.desarrolloweb.matchfinder.dtos.response.AmigoResponse;
 import com.desarrolloweb.matchfinder.services.AmistadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ public class AmigoController {
     private final AmistadService amistadService;
 
     @GetMapping
-    public ResponseEntity<List<UsuarioResumenResponse>> listar(Authentication authentication) {
+    public ResponseEntity<List<AmigoResponse>> listar(Authentication authentication) {
         return ResponseEntity.ok(amistadService.listarAmigos(authentication.getName()));
     }
 

@@ -1,5 +1,6 @@
 package com.desarrolloweb.matchfinder.services.impl;
 
+import com.desarrolloweb.matchfinder.dtos.response.AmigoResponse;
 import com.desarrolloweb.matchfinder.dtos.response.SolicitudAmistadResponse;
 import com.desarrolloweb.matchfinder.dtos.response.UsuarioResumenResponse;
 import com.desarrolloweb.matchfinder.entities.Amistad;
@@ -100,7 +101,7 @@ public class AmistadServiceImpl implements AmistadService {
     @Transactional(readOnly = true)
     public List<SolicitudAmistadResponse> solicitudesRecibidas(String email, EstadoSolicitud estado) {
         MatchFinderUser usuario = autenticado.obtener(email);
-        return solicitudRepository.findByDestinatarioAndEstadoOrderByIdDesc(usuario, estado).stream()
+        return solicitudRepository.recibidas(usuario, estado).stream()
                 .map(SolicitudAmistadResponse::desde)
                 .toList();
     }
@@ -109,17 +110,17 @@ public class AmistadServiceImpl implements AmistadService {
     @Transactional(readOnly = true)
     public List<SolicitudAmistadResponse> solicitudesEnviadas(String email) {
         MatchFinderUser usuario = autenticado.obtener(email);
-        return solicitudRepository.findByRemitenteOrderByIdDesc(usuario).stream()
+        return solicitudRepository.enviadas(usuario).stream()
                 .map(SolicitudAmistadResponse::desde)
                 .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<UsuarioResumenResponse> listarAmigos(String email) {
+    public List<AmigoResponse> listarAmigos(String email) {
         MatchFinderUser usuario = autenticado.obtener(email);
-        return amistadRepository.findByUsuarioOrderByAmigoNombreAsc(usuario).stream()
-                .map(a -> UsuarioResumenResponse.desde(a.getAmigo()))
+        return amistadRepository.listarAmigos(usuario).stream()
+                .map(a -> AmigoResponse.desde(a.getAmigo()))
                 .toList();
     }
 

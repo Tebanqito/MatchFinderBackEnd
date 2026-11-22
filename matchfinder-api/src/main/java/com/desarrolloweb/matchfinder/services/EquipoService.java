@@ -3,18 +3,22 @@ package com.desarrolloweb.matchfinder.services;
 import com.desarrolloweb.matchfinder.dtos.request.EquipoCreateRequest;
 import com.desarrolloweb.matchfinder.dtos.request.EquipoUpdateRequest;
 import com.desarrolloweb.matchfinder.dtos.response.EquipoDetalleResponse;
-import com.desarrolloweb.matchfinder.dtos.response.EquipoResponse;
 import com.desarrolloweb.matchfinder.dtos.response.PaginaResponse;
 import com.desarrolloweb.matchfinder.entities.MatchFinderUser;
 import com.desarrolloweb.matchfinder.entities.enums.TipoEquipo;
+
+import java.util.Optional;
 
 public interface EquipoService {
 
     EquipoDetalleResponse crear(EquipoCreateRequest request, String email);
 
-    PaginaResponse<EquipoResponse> listar(TipoEquipo tipo, String nombre, boolean conCupo, int page, int size);
+    PaginaResponse<EquipoDetalleResponse> listar(TipoEquipo tipo, String nombre, boolean conCupo, int page, int size);
 
     EquipoDetalleResponse obtener(Integer id);
+
+    /** Equipo al que pertenece el usuario autenticado, o vacío si no pertenece a ninguno. */
+    Optional<EquipoDetalleResponse> obtenerMio(String email);
 
     EquipoDetalleResponse editar(Integer id, EquipoUpdateRequest request, String email);
 

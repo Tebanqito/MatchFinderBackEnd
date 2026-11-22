@@ -3,7 +3,6 @@ package com.desarrolloweb.matchfinder.controllers;
 import com.desarrolloweb.matchfinder.dtos.request.EquipoCreateRequest;
 import com.desarrolloweb.matchfinder.dtos.request.EquipoUpdateRequest;
 import com.desarrolloweb.matchfinder.dtos.response.EquipoDetalleResponse;
-import com.desarrolloweb.matchfinder.dtos.response.EquipoResponse;
 import com.desarrolloweb.matchfinder.dtos.response.PaginaResponse;
 import com.desarrolloweb.matchfinder.entities.enums.TipoEquipo;
 import com.desarrolloweb.matchfinder.services.EquipoService;
@@ -40,13 +39,25 @@ public class EquipoController {
     }
 
     @GetMapping
-    public ResponseEntity<PaginaResponse<EquipoResponse>> listar(
+    public ResponseEntity<PaginaResponse<EquipoDetalleResponse>> listar(
             @RequestParam(required = false) TipoEquipo tipo,
             @RequestParam(required = false) String nombre,
             @RequestParam(defaultValue = "false") boolean conCupo,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
         return ResponseEntity.ok(equipoService.listar(tipo, nombre, conCupo, page, size));
+    }
+
+    /**
+     * Equipo del usuario autenticado: 200 con el detalle, o 204 si todavía no pertenece a ninguno.
+     * Va antes que "/{id}" para que "mio" no se interprete como un id.
+     */
+    @GetMapping("/mio")
+    @PreAuthorize("hasRole('USUARIO')")
+    public ResponseEntity<EquipoDetalleResponse> obtenerMio(Authentication authentication) {
+        return equipoService.obtenerMio(authentication.getName())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @GetMapping("/{id}")
