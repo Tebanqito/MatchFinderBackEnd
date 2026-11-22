@@ -3,7 +3,6 @@ package com.desarrolloweb.matchfinder.services.impl;
 import com.desarrolloweb.matchfinder.dtos.request.EquipoCreateRequest;
 import com.desarrolloweb.matchfinder.dtos.request.EquipoUpdateRequest;
 import com.desarrolloweb.matchfinder.dtos.response.EquipoDetalleResponse;
-import com.desarrolloweb.matchfinder.dtos.response.EquipoResponse;
 import com.desarrolloweb.matchfinder.dtos.response.PaginaResponse;
 import com.desarrolloweb.matchfinder.entities.Equipo;
 import com.desarrolloweb.matchfinder.entities.MatchFinderUser;
@@ -28,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -59,17 +59,16 @@ public class EquipoServiceImpl implements EquipoService {
                 .build());
 
         // El creador es el primer integrante
-        unirse(usuario.getId(), usuario.getEmail());
-        //usuario.setEquipo(equipo);
-        //userRepository.save(usuario);
-        //equipo.getMiembros().add(usuario);
+        usuario.setEquipo(equipo);
+        userRepository.save(usuario);
+        equipo.getMiembros().add(usuario);
 
         return EquipoDetalleResponse.desde(equipo);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PaginaResponse<EquipoResponse> listar(TipoEquipo tipo, String nombre, boolean conCupo,
+    public PaginaResponse<EquipoDetalleResponse> listar(TipoEquipo tipo, String nombre, boolean conCupo,
                                                  int page, int size) {
         Specification<Equipo> spec = (root, query, cb) -> cb.conjunction();
 
@@ -91,13 +90,20 @@ public class EquipoServiceImpl implements EquipoService {
 
         return PaginaResponse.de(
                 equipoRepository.findAll(spec, PageRequest.of(page, size, Sort.by("id")))
-                        .map(EquipoResponse::desde));
+                        .map(EquipoDetalleResponse::desde));
     }
 
     @Override
     @Transactional(readOnly = true)
     public EquipoDetalleResponse obtener(Integer id) {
         return EquipoDetalleResponse.desde(buscar(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<EquipoDetalleResponse> obtenerMio(String email) {
+        MatchFinderUser usuario = autenticado.obtener(email);
+        return Optional.ofNullable(usuario.getEquipo()).map(EquipoDetalleResponse::desde);
     }
 
     @Override

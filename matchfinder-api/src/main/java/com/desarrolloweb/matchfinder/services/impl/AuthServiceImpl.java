@@ -87,6 +87,6 @@ public class AuthServiceImpl implements AuthService {
 
     private AuthResponse construirRespuesta(MatchFinderUser user) {
         String token = jwtService.generateToken(user.getEmail(), List.of("ROLE_" + user.getRol().name()));
-        return new AuthResponse(token, "Bearer", user.getEmail(), user.getRol().name());
+        return new AuthResponse(token, "Bearer", user.getEmail(), user.getNombre(), user.getRol().name());
     }
 }

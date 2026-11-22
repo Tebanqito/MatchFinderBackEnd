@@ -3,12 +3,14 @@ package com.desarrolloweb.matchfinder.entities;
 import com.desarrolloweb.matchfinder.entities.enums.TipoEquipo;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "equipos")
+@BatchSize(size = 100)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -31,6 +33,7 @@ public class Equipo {
     private TipoEquipo tipo;
 
     @OneToMany(mappedBy = "equipo")
+    @BatchSize(size = 100)
     @Builder.Default
     private List<MatchFinderUser> miembros = new ArrayList<>();
 }

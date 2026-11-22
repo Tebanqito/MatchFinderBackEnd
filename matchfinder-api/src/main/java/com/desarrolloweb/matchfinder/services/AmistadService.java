@@ -1,5 +1,6 @@
 package com.desarrolloweb.matchfinder.services;
 
+import com.desarrolloweb.matchfinder.dtos.response.AmigoResponse;
 import com.desarrolloweb.matchfinder.dtos.response.SolicitudAmistadResponse;
 import com.desarrolloweb.matchfinder.dtos.response.UsuarioResumenResponse;
 import com.desarrolloweb.matchfinder.entities.enums.EstadoSolicitud;
@@ -16,7 +17,7 @@ public interface AmistadService {
 
     List<SolicitudAmistadResponse> solicitudesEnviadas(String email);
 
-    List<UsuarioResumenResponse> listarAmigos(String email);
+    List<AmigoResponse> listarAmigos(String email);
 
     void eliminarAmigo(String email, Integer amigoId);
 }
