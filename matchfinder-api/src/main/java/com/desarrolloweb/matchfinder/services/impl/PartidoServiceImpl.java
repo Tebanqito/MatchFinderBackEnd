@@ -12,10 +12,13 @@ import com.desarrolloweb.matchfinder.exceptions.ReglaNegocioException;
 import com.desarrolloweb.matchfinder.repositories.PartidoRepository;
 import com.desarrolloweb.matchfinder.repositories.TorneoRepository;
 import com.desarrolloweb.matchfinder.services.PartidoService;
+import com.desarrolloweb.matchfinder.services.impl.LlaveCalculador.Cruce;
+import com.desarrolloweb.matchfinder.services.impl.LlaveCalculador.Resultado;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -45,6 +48,19 @@ public class PartidoServiceImpl implements PartidoService {
         }
         Equipo ganador = request.ganadorId().equals(uno.getId()) ? uno : dos;
 
+        // El partido tiene que ser un cruce que existe hoy en la llave
+        Cruce cruce = calcularRondas(torneo).stream()
+                .flatMap(List::stream)
+                .filter(c -> c.equipoUno() != null && c.equipoDos() != null)
+                .filter(c -> (c.equipoUno().equals(uno.getId()) && c.equipoDos().equals(dos.getId()))
+                        || (c.equipoUno().equals(dos.getId()) && c.equipoDos().equals(uno.getId())))
+                .findFirst()
+                .orElseThrow(() -> new ReglaNegocioException(
+                        "Ese partido no corresponde a la llave: los equipos todavía no se enfrentan o alguno ya fue eliminado"));
+        if (cruce.partidoId() != null) {
+            throw new ConflictoException("Ese cruce ya tiene un resultado cargado: borralo antes de cargar otro");
+        }
+
         return PartidoResponse.desde(partidoRepository.save(Partido.builder()
                 .torneo(torneo)
                 .equipoUno(uno)
@@ -68,7 +84,21 @@ public class PartidoServiceImpl implements PartidoService {
         Partido partido = partidoRepository.findByIdAndTorneoId(partidoId, torneoId)
                 .orElseThrow(() -> new RecursoNoEncontradoException(
                         "Partido con id " + partidoId + " no encontrado en el torneo " + torneoId));
-        partidoRepository.delete(partido);
+
+        // También se borran los partidos de rondas posteriores que dependían del ganador de este
+        List<Integer> aBorrar = new ArrayList<>();
+        aBorrar.add(partido.getId());
+        aBorrar.addAll(LlaveCalculador.partidosDependientes(calcularRondas(partido.getTorneo()), partido.getId()));
+        partidoRepository.deleteAllById(aBorrar);
+    }
+
+    private List<List<Cruce>> calcularRondas(Torneo torneo) {
+        List<Integer> ids = torneo.getEquipos().stream().map(Equipo::getId).toList();
+        List<Resultado> resultados = partidoRepository.findByTorneoIdOrderByIdAsc(torneo.getId()).stream()
+                .map(p -> new Resultado(p.getId(), p.getEquipoUno().getId(), p.getEquipoDos().getId(),
+                        p.getGanador().getId()))
+                .toList();
+        return LlaveCalculador.calcular(ids, resultados);
     }
 
     private Torneo buscarTorneo(Integer id) {

@@ -4,9 +4,10 @@ import com.desarrolloweb.matchfinder.entities.enums.EstadoTorneo;
 import com.desarrolloweb.matchfinder.entities.enums.TipoEquipo;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "torneos")
@@ -35,10 +36,16 @@ public class Torneo {
     @Column(nullable = false, length = 20)
     private EstadoTorneo estado;
 
+    /**
+     * Equipos sorteados, en el orden del sorteo (columna "orden" de torneo_equipos).
+     * Ese orden define los cruces de la llave.
+     */
     @ManyToMany
+    @OrderColumn(name = "orden")
+    @BatchSize(size = 50)
     @JoinTable(name = "torneo_equipos",
             joinColumns = @JoinColumn(name = "torneo_id"),
             inverseJoinColumns = @JoinColumn(name = "equipo_id"))
     @Builder.Default
-    private Set<Equipo> equipos = new HashSet<>();
+    private List<Equipo> equipos = new ArrayList<>();
 }
